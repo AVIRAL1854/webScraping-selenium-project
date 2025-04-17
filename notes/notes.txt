@@ -1,0 +1,74 @@
+
+to activate the  virtual environment run .venv\Scripts\activate
+
+
+First scrape the whole HTML and then after that on local scrape the data 
+
+
+------------------------------------------
+
+results format
+
+{'https://www.eventbrite.com/e/seattle-breakfast-with-giraffes-a-film-by-soroush-sehat-tickets-1315622495299?aff=ebdssbdestsearch': {'organizer': 'Daricheh Cinema - USA', 'social_links': ['https://www.facebook.com/darichehcinema', 'https://www.twitter.com/darichehcinema']}}
+
+
+
+
+
+---------------------------------------------
+
+
+
+
+testUrl =[
+    "https://www.eventbrite.com/e/seattle-breakfast-with-giraffes-a-film-by-soroush-sehat-tickets-1315622495299?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/seattle-breakfast-with-giraffes-a-film-by-soroush-sehat-tickets-1315622495299?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/seattle-breakfast-with-giraffes-a-film-by-soroush-sehat-tickets-1315622495299?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-aia-seattle-parti-tickets-1247608152569?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-aia-seattle-parti-tickets-1247608152569?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-aia-seattle-parti-tickets-1247608152569?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-aia-seattle-parti-tickets-1247608152569?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/creative-works-west-ii-tickets-1079788469379?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/6th-annual-ssa-national-entire-conference-tickets-1267884078409?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/6th-annual-ssa-national-entire-conference-tickets-1267884078409?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/6th-annual-ssa-national-entire-conference-tickets-1267884078409?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/6th-annual-ssa-national-entire-conference-tickets-1267884078409?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/comedian-alyce-chan-april-24th-8-pm-at-laughs-comedy-club-seattle-tickets-1055798595019?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/comedian-alyce-chan-april-24th-8-pm-at-laughs-comedy-club-seattle-tickets-1055798595019?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/comedian-alyce-chan-april-24th-8-pm-at-laughs-comedy-club-seattle-tickets-1055798595019?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/comedian-alyce-chan-april-24th-8-pm-at-laughs-comedy-club-seattle-tickets-1055798595019?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/seattle-regional-rally-exp-realty-tickets-1206017764599?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/seattle-regional-rally-exp-realty-tickets-1206017764599?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/creative-works-west-ii-tickets-1079788469379?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/seattle-regional-rally-exp-realty-tickets-1206017764599?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/seattle-regional-rally-exp-realty-tickets-1206017764599?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-taste-of-asia-food-restaurant-industry-confereseattle-tickets-1292213408089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-taste-of-asia-food-restaurant-industry-confereseattle-tickets-1292213408089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-taste-of-asia-food-restaurant-industry-confereseattle-tickets-1292213408089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-taste-of-asia-food-restaurant-industry-confereseattle-tickets-1292213408089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-seattle-hospitality-tradeshow-registration-1235103851869?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-seattle-hospitality-tradeshow-registration-1235103851869?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-seattle-hospitality-tradeshow-registration-1235103851869?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-seattle-hospitality-tradeshow-registration-1235103851869?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/creative-works-west-ii-tickets-1079788469379?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/taal-bollywood-after-dark-tickets-1299955815839?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/taal-bollywood-after-dark-tickets-1299955815839?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/taal-bollywood-after-dark-tickets-1299955815839?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/taal-bollywood-after-dark-tickets-1299955815839?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/the-art-and-science-of-the-performing-voice-2025-tickets-1012392462107?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/the-art-and-science-of-the-performing-voice-2025-tickets-1012392462107?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/the-art-and-science-of-the-performing-voice-2025-tickets-1012392462107?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/the-art-and-science-of-the-performing-voice-2025-tickets-1012392462107?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-wssha-spring-health-law-conference-tickets-1262828517089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-wssha-spring-health-law-conference-tickets-1262828517089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/creative-works-west-ii-tickets-1079788469379?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-wssha-spring-health-law-conference-tickets-1262828517089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-wssha-spring-health-law-conference-tickets-1262828517089?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/mutoid-man-special-guests-tickets-1286950396279?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/mutoid-man-special-guests-tickets-1286950396279?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/mutoid-man-special-guests-tickets-1286950396279?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/mutoid-man-special-guests-tickets-1286950396279?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/daybreaker-sea-w-bellevue-april-26-tickets-1254544027959?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/daybreaker-sea-w-bellevue-april-26-tickets-1254544027959?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/daybreaker-sea-w-bellevue-april-26-tickets-1254544027959?aff=ebdssbdestsearch"]
+

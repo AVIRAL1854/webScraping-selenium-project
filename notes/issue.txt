@@ -1,0 +1,44 @@
+pagination value
+open each  event and scrape it once again
+folder structure to save the data 
+        - data/country/city/ txt
+
+
+
+
+
+- orgainizer website 
+- orgainizer instagram
+- orgainizer Twitter/X
+- orgainizer website scrapping to get terms related to instagram, facebook etc
+
+
+add error handling 
+no copies
+using pandas convert this into excel sheet 
+create the flag to give the quertCountry and queryCity
+
+
+
+
+
+
+
+----PROCESS -----
+
+
+1)first scrape all the links from the events pages
+2)Then scrape each event link to get the orgainizer details in other folder
+3)Now extract data from the collected data and save in csv
+4)clear the html data
+5)clear the garbage to clear space
+
+
+
+
+
+LEFT---->
+
+1) scrape from personal site 
+2) make good error handling and keep count of last executed url( and based on that mark it inside csv and when run next time check first for the last executed and start from there)
+3) learn how to give variable value in terminal running command  
