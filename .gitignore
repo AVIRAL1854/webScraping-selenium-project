@@ -5,7 +5,7 @@ __pycache__/
 data/
 finalCSV/
 *.txt
-
+progressReport/
 .venv
 finalCSV
 data

@@ -5,134 +5,151 @@ from selenium.common.exceptions import NoSuchElementException
 import time
 from exportToCsv import export_to_csv_with_pandas
 import os
+import json
 from remove_duplicate_organizers import remove_duplicate_organizers
 
-def extract_social_links_from_urls(urls ,queryCountry='default',queryCity='default'):
+def extract_social_links_from_urls(urls, queryCountry='default', queryCity='default'):
     # Setup headless Firefox
     fireFox_options = Options()
-    fireFox_options.add_argument("--headless")  # Run in headless mode
-
+    fireFox_options.add_argument("--headless")
     driver = webdriver.Firefox(options=fireFox_options)
 
     results = {}
 
-    for url in urls:
-        try:
-            driver.get(url)
-            time.sleep(2)  # Let page load
-            # print(results)
-            # Extract social links
+    # Progress report paths
+    progress_report_dir = f"progressReport/{queryCountry}/{queryCity}"
+    os.makedirs(progress_report_dir, exist_ok=True)
+    progress_report_path = os.path.join(progress_report_dir, "progress_report.json")
+
+    # Load or initialize progress report
+    if os.path.exists(progress_report_path):
+        with open(progress_report_path, "r") as f:
+            progress_report = json.load(f)
+    else:
+        progress_report = {
+            "totalPages": 0,
+            "lastRunningPage": 0,
+            "pageError": "",
+            "urlArray": [],
+            "lastURLCounter": 0,
+            "urlError": "",
+            "totalUrls": len(urls)
+        }
+
+    # Update totalUrls
+    progress_report["totalUrls"] = len(urls)
+
+    # Resume logic: skip already processed URLs
+    start_index = progress_report.get("lastURLCounter", 0)
+    urls_to_process = urls[start_index:]
+
+    print(f"Resuming scraping from URL index {start_index} out of {len(urls)}")
+
+
+    try:
+        for idx, url in enumerate(urls_to_process, start=start_index):
             try:
-                social_links_div = driver.find_element(By.CSS_SELECTOR, 'div.css-ojn45[data-testid="socialLinks"]')
-                a_tags = social_links_div.find_elements(By.TAG_NAME, 'a')
-                links = [a.get_attribute('href') for a in a_tags if a.get_attribute('href')]
-            except NoSuchElementException:
-                links = []
+                driver.get(url)
+                time.sleep(2)
 
+                # Extract social links
+                try:
+                    social_links_div = driver.find_element(By.CSS_SELECTOR, 'div.css-ojn45[data-testid="socialLinks"]')
+                    a_tags = social_links_div.find_elements(By.TAG_NAME, 'a')
+                    links = [a.get_attribute('href') for a in a_tags if a.get_attribute('href')]
+                except NoSuchElementException:
+                    links = []
 
+                # Extract organizer name
+                try:
+                    organizer_element = driver.find_element(By.CLASS_NAME, 'descriptive-organizer-info-mobile__name-link')
+                    organizer_name = organizer_element.text.strip()
+                except NoSuchElementException:
+                    organizer_name = "Organizer name not found"
 
+                # Extract logo URL
+                try:
+                    svg = driver.find_element(By.CSS_SELECTOR, 'svg[data-spec="spec-avatar"]')
+                    image_tag = svg.find_element(By.TAG_NAME, "image")
+                    logoUrl = image_tag.get_attribute("href") or image_tag.get_attribute("xlink:href")
+                except NoSuchElementException:
+                    logoUrl = None
 
-            # Extract organizer name
-            try:
-                organizer_element = driver.find_element(By.CLASS_NAME, 'descriptive-organizer-info-mobile__name-link')
-                organizer_name = organizer_element.text.strip()
-            except NoSuchElementException:
-                organizer_name = "Organizer name not found"
+                # Extract banner URL
+                try:
+                    img = driver.find_element(By.CSS_SELECTOR, '[data-testid="hero-img"]')
+                    bannerSrc = img.get_attribute("src")
+                except NoSuchElementException:
+                    bannerSrc = None
 
+                # Extract date and time
+                try:
+                    datetime_span = driver.find_element(By.CLASS_NAME, "date-info__full-datetime")
+                    datetime_text = datetime_span.text.strip()
+                except NoSuchElementException:
+                    datetime_text = "N/A"
 
+                # Extract event title
+                try:
+                    title_element = driver.find_element(By.CLASS_NAME, "event-title")
+                    eventTitle = title_element.text.strip()
+                except NoSuchElementException:
+                    eventTitle = "N/A"
 
+                # Debug output
+                print(f"\n🔗 URL: {url}")
+                print(f"👤 Organizer: {organizer_name}")
+                print(f"📱 Social Links: {links}")
+                print(f"🔗 Banner URL: {bannerSrc}")
+                print(f"🔗 Logo URL: {logoUrl}")
+                print(f"📆 Date & Time: {datetime_text}")
+                print(f"📝 Event Title: {eventTitle}\n")
 
+                results[url] = {
+                    "organizer": organizer_name,
+                    "social_links": links,
+                    "banner_link": bannerSrc,
+                    "logo_url": logoUrl,
+                    "dateTime": datetime_text,
+                    "eventTitle": eventTitle
+                }
 
+                # Update progress
+                progress_report["urlArray"].append(url)
+                progress_report["lastURLCounter"] = idx + 1
+                progress_report["urlError"] = ""
 
-            # extracting logo url
-            try:
-  
-                svg = driver.find_element(By.CSS_SELECTOR, 'svg[data-spec="spec-avatar"]')
-                image_tag = svg.find_element(By.TAG_NAME, "image")
-                logoUrl = image_tag.get_attribute("href") or image_tag.get_attribute("xlink:href")
-                # print("Logo URL:", logoUrl)
+            except Exception as e:
+                print(f"❌ Error processing {url}: {e}")
+                results[url] = {
+                    "organizer": None,
+                    "social_links": [],
+                    "banner_link": None,
+                    "logo_url": None,
+                    "dateTime": None,
+                    "eventTitle": None
+                }
+                progress_report["urlError"] = str(e)
+                # break  # Optional: stop on error
 
-            except NoSuchElementException:
-                print("Error: logo image not found.")
-                logoUrl = None
+            # Save progress after every URL
+            with open(progress_report_path, "w") as f:
+                json.dump(progress_report, f, indent=2)
 
+    finally:
+        driver.quit()
 
+        # Save final data
+        output_dir = f"finalCSV/{queryCountry}/{queryCity}"
+        os.makedirs(output_dir, exist_ok=True)
+        export_to_csv_with_pandas(results, f"{output_dir}/inputTestData.csv")
 
+        # Remove duplicates
+        input_file = f"{output_dir}/inputTestData.csv"
+        output_file = f"{output_dir}/uniqueTestData.csv"
+        remove_duplicate_organizers(input_file, output_file)
 
-
-
-            # extracting banner url 
-            try:
-                # Locate the image using data-testid attribute
-                img = driver.find_element(By.CSS_SELECTOR, '[data-testid="hero-img"]')
-                bannerSrc = img.get_attribute("src")
-                
-
-            except NoSuchElementException:
-                print( "Error: Image with data-testid='hero-img' not found.")
-                bannerSrc=None
-            #extracting date and time 
-            try:
-                datetime_span = driver.find_element(By.CLASS_NAME, "date-info__full-datetime")
-                datetime_text = datetime_span.text.strip()
-            except NoSuchElementException:
-                print( "Error: date and time not found")
-                datetime_text="N/A"
-            
-            #extracting event title
-            try:
-                title_element = driver.find_element(By.CLASS_NAME, "event-title")
-                eventTitle = title_element.text.strip()
-
-
-            except NoSuchElementException:
-                print( "Error: event title not found")
-                eventTitle="N/A"
-
-
-
-
-            print(f"\n🔗 URL: {url}")
-            print(f"👤 Organizer: {organizer_name}")
-            print(f"📱 Social Links: {links}\n")
-            print(f" 🔗 banner Url:{bannerSrc}\n")
-            print(f" 🔗 logo URL:{logoUrl}\n")
-            print(f" 👤 date and time:{datetime_text}\n")
-            print(f" 📱 eventTitle:{eventTitle}\n")
-            results[url] = {
-                "organizer": organizer_name,
-                "social_links": links,
-                "banner_link":bannerSrc,
-                "logo_url":logoUrl,
-                "dateTime":datetime_text,
-                "eventTitle":eventTitle
-
-            }
-        except Exception as e:
-            print(f"❌ Error processing {url}: {e}")
-            results[url] = {
-                "organizer": None,
-                "social_links": [],
-                 "banner_link":None,
-                "logo_url":None,
-                "dateTime":None,
-                "eventTitle":None
-            }
-
-    driver.quit()
-
-
-    output_dir = f"finalCSV/{queryCountry}/{queryCity}"
-    os.makedirs(output_dir, exist_ok=True)
-    # exporting as csv
-    export_to_csv_with_pandas(results, f"{output_dir}/inputTestData.csv")
-
-    # Now clean it by removing duplicate organizerName rows
-    input_file = f"{output_dir}/inputTestData.csv"
-    output_file = f"{output_dir}/uniqueTestData.csv"
-    remove_duplicate_organizers(input_file, output_file)
-    return results
-
+        return results
 
 
 # Uncomment to test with the list
@@ -143,11 +160,29 @@ def extract_social_links_from_urls(urls ,queryCountry='default',queryCity='defau
 
 
 # testUrl =[
-#     "https://www.eventbrite.com/e/seattle-breakfast-with-giraffes-a-film-by-soroush-sehat-tickets-1315622495299?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/2025-aia-seattle-parti-tickets-1247608152569?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/an-evening-with-eckhart-tolle-in-seattle-tickets-1219229561439?aff=ebdssbdestsearch&keep_tld=1",
-#     "https://www.eventbrite.com/e/how-to-holistically-heal-your-trauma-a-shadow-work-workshop-seattle-wa-tickets-1315458986239?aff=erellivmlt&_gl=1*6ftbws*_up*MQ..*_ga*MTg5MjE3ODQ0OC4xNzQ0OTE5OTIz*_ga_TQVES5V6SH*MTc0NDkxOTkyMi4xLjEuMTc0NDkyMTMwNi4wLjAuMA..*_ga_D6TD2GD2ER*MTc0NDkyMTMxMC4xLjAuMTc0NDkyMTMxMC4wLjAuMA.."
+#     "https://www.eventbrite.com/e/seattle-new-friends-single-professionals-mixer-33-42-group-tickets-1305657720389?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/in-person-class-hand-rolled-sushi-seattle-tickets-1287920447729?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/bearracuda-seattles-locker-room-party-tickets-1317654312519?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/the-well-day-retreat-for-mothers-and-gestational-parents-tickets-1284798580139?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/sake-x-jazz-presents-trio-samambaia-when-spring-comes-at-kais-bistro-tickets-1309095964269?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/mediumship-demonstration-tickets-1287926415579?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/introduction-to-sensual-dance-and-low-flow-tickets-1079459706039?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/press-sip-a-luxury-press-on-nail-experience-tickets-1305085729549?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/km-huber-with-suzanne-morrison-call-of-the-owl-woman-tickets-1312123068419?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/4-day-pmp-examination-certification-training-course-in-bellevue-wa-tickets-975711448207?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/lucky-seven-casino-night-at-the-collective-seattle-tickets-1307392539279?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/agile-certification-from-pmi-in-seattle-tickets-1219123915449?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/the-rose-codes-unlock-your-intuition-creativity-higher-wisdom-tickets-1316663549119?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/jazzvox-house-concert-john-proulx-alyssa-allgood-seattle-madrona-2-tickets-1210223584319?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/suite-restaurant-lounge-bellevue-paint-your-pet-tickets-1258923557249?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/2025-world-tai-chi-and-quigong-day-free-tai-chi-seminar-tickets-1285182658929?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/in-person-cisa-exam-prep-course-in-seattle-tickets-1112313783469?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/elev8-tickets-1295202659019?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/seattle-shores-love-scavenger-hunt-for-couples-date-night-tickets-821477650767?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/healthcare-and-business-networking-elevating-your-potential-seattle-tickets-1268610902359?aff=ebdssbdestsearch",
+#     "https://www.eventbrite.com/e/sips-silent-reading-tickets-1307342750359?aff=ebdssbdestsearch"
+    
 #     ]
 
 
-# extract_social_links_from_urls(testUrl,"India2")
+# extract_social_links_from_urls(testUrl,"India2","bhopalsdsdsdsd11")

@@ -42,3 +42,8 @@ LEFT---->
 1) scrape from personal site 
 2) make good error handling and keep count of last executed url( and based on that mark it inside csv and when run next time check first for the last executed and start from there)
 3) learn how to give variable value in terminal running command  
+
+
+
+
+Error processing https://www.eventbrite.com/e/an-evening-with-thriller-authors-elena-taylor-and-jeff-ayers-tickets-1321991224339?aff=ebdssbdestsearch: HTTPConnectionPool(host='localhost', port=53862): Read timed out. (read timeout=120)
