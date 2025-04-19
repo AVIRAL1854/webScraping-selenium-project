@@ -7,6 +7,8 @@ from exportToCsv import export_to_csv_with_pandas
 import os
 import json
 from remove_duplicate_organizers import remove_duplicate_organizers
+import pandas as pd
+from separate_url_and_page import separate_url_and_page
 
 def extract_social_links_from_urls(urls, queryCountry='default', queryCity='default'):
     # Setup headless Firefox
@@ -28,11 +30,12 @@ def extract_social_links_from_urls(urls, queryCountry='default', queryCity='defa
     else:
         progress_report = {
             "totalPages": 0,
+            "totalPagesReal":0,
             "lastRunningPage": 0,
-            "pageError": "",
+            "pageError": [],
             "urlArray": [],
             "lastURLCounter": 0,
-            "urlError": "",
+            "urlError": [],
             "totalUrls": len(urls)
         }
 
@@ -43,12 +46,15 @@ def extract_social_links_from_urls(urls, queryCountry='default', queryCity='defa
     start_index = progress_report.get("lastURLCounter", 0)
     urls_to_process = urls[start_index:]
 
-    print(f"Resuming scraping from URL index {start_index} out of {len(urls)}")
+    # print(f"Resuming scraping from URL index {start_index} out of {len(urls)}")
 
 
     try:
-        for idx, url in enumerate(urls_to_process, start=start_index):
+        for idx, original_url in enumerate(urls_to_process, start=start_index):
+            start_index = progress_report.get("lastURLCounter", 0)
+            print(f"\n\nResuming scraping from URL index {start_index} out of {len(urls)}\n\n")
             try:
+                url, page_number = separate_url_and_page(original_url)
                 driver.get(url)
                 time.sleep(2)
 
@@ -96,8 +102,19 @@ def extract_social_links_from_urls(urls, queryCountry='default', queryCity='defa
                 except NoSuchElementException:
                     eventTitle = "N/A"
 
+                #extract number of followers organizer have
+
+                try:
+                    followers_element = driver.find_element(By.CLASS_NAME, "organizer-stats__highlight")
+                    strong_tag = followers_element.find_element(By.TAG_NAME, "strong")
+                    followers_count = strong_tag.text.strip()
+                except NoSuchElementException:
+                    followers_count = None
+
+
                 # Debug output
                 print(f"\n🔗 URL: {url}")
+                print(f"\n🔗 pageNumber: {page_number}")
                 print(f"👤 Organizer: {organizer_name}")
                 print(f"📱 Social Links: {links}")
                 print(f"🔗 Banner URL: {bannerSrc}")
@@ -107,29 +124,37 @@ def extract_social_links_from_urls(urls, queryCountry='default', queryCity='defa
 
                 results[url] = {
                     "organizer": organizer_name,
+                    "followersCount":followers_count,
                     "social_links": links,
                     "banner_link": bannerSrc,
                     "logo_url": logoUrl,
                     "dateTime": datetime_text,
-                    "eventTitle": eventTitle
+                    "eventTitle": eventTitle,
+                    "page_number": page_number 
+
                 }
 
                 # Update progress
                 progress_report["urlArray"].append(url)
                 progress_report["lastURLCounter"] = idx + 1
-                progress_report["urlError"] = ""
+                # progress_report["urlError"] = ""
 
             except Exception as e:
                 print(f"❌ Error processing {url}: {e}")
                 results[url] = {
                     "organizer": None,
+                    "followersCount":followers_count,
                     "social_links": [],
                     "banner_link": None,
                     "logo_url": None,
                     "dateTime": None,
-                    "eventTitle": None
+                    "eventTitle": None,
+                    "page_number": page_number 
                 }
-                progress_report["urlError"] = str(e)
+                progress_report["urlError"].append({
+                "url": url,
+                "error": str(e)
+            })
                 # break  # Optional: stop on error
 
             # Save progress after every URL
@@ -139,15 +164,74 @@ def extract_social_links_from_urls(urls, queryCountry='default', queryCity='defa
     finally:
         driver.quit()
 
-        # Save final data
+        # Prepare file paths
         output_dir = f"finalCSV/{queryCountry}/{queryCity}"
         os.makedirs(output_dir, exist_ok=True)
-        export_to_csv_with_pandas(results, f"{output_dir}/inputTestData.csv")
+
+        input_file = f"{output_dir}/inputTestData.csv"
+
+        if os.path.exists(input_file):
+            # Load existing data
+            existing_df = pd.read_csv(input_file)
+
+            # Convert new results (dict) to DataFrame using same logic as export_to_csv_with_pandas
+            rows = []
+            for event_link, details in results.items():
+                row = {
+                    "organizerName": details.get("organizer", ""),
+                    "followersCount":details.get("followers_count",""),
+                    "eventTitle": details.get("eventTitle", ""),
+                    "dateTime": details.get("dateTime", ""),
+                    "banner_link": details.get("banner_link", ""),
+                    "logo_url": details.get("logo_url", ""),
+                    "facebook": "",
+                    "instagram": "",
+                    "twitter": "",
+                    "personal website": "",
+                    "LinkedIn": "",
+                    "Pinterest": "",
+                    "WeChat": "",
+                    "WhatsApp": "",
+                    "TikTok": "",
+                    "eventbrite event link": event_link,
+                    "page_number": details.get("page_number", "")
+                }
+
+                for link in details.get("social_links", []):
+                    if "facebook.com" in link:
+                        row["facebook"] = link
+                    elif "instagram.com" in link:
+                        row["instagram"] = link
+                    elif "twitter.com" in link or "x.com" in link:
+                        row["twitter"] = link
+                    elif "linkedin.com" in link:
+                        row["LinkedIn"] = link
+                    elif "pinterest.com" in link:
+                        row["Pinterest"] = link
+                    elif "wechat.com" in link:
+                        row["WeChat"] = link
+                    elif "whatsapp.com" in link:
+                        row["WhatsApp"] = link
+                    elif "tiktok.com" in link:
+                        row["TikTok"] = link
+                    else:
+                        row["personal website"] = link
+
+                rows.append(row)
+
+            new_df = pd.DataFrame(rows)
+
+            # Append new data
+            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            combined_df.to_csv(input_file, index=False, encoding='utf-8-sig')
+        else:
+            # First time writing, so just use your function
+            export_to_csv_with_pandas(results, input_file)
 
         # Remove duplicates
-        input_file = f"{output_dir}/inputTestData.csv"
         output_file = f"{output_dir}/uniqueTestData.csv"
         remove_duplicate_organizers(input_file, output_file)
+
 
         return results
 

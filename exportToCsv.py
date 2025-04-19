@@ -6,6 +6,7 @@ def export_to_csv_with_pandas(data: dict, output_file='event_data.csv'):
     for event_link, details in data.items():
         row = {
             "organizerName": details.get("organizer", ""),
+            "followersCount":details.get("followers_count",""),
             "eventTitle": details.get("eventTitle", ""),
             "dateTime": details.get("dateTime", ""),
             "banner_link": details.get("banner_link", ""),
@@ -19,7 +20,8 @@ def export_to_csv_with_pandas(data: dict, output_file='event_data.csv'):
             "WeChat": "",
             "WhatsApp": "",
             "TikTok": "",
-            "eventbrite event link": event_link
+            "eventbrite event link": event_link,
+            "page_number": details.get("page_number", "")
         }
 
         for link in details.get("social_links", []):

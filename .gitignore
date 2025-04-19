@@ -10,6 +10,8 @@ progressReport/
 finalCSV
 data
 
+notes/
+
 # C extensions
 *.so
 

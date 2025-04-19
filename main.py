@@ -39,11 +39,12 @@ progress_report_path = os.path.join(progress_report_dir, "progress_report.json")
 # Try to load the progress report if exists, else create a new one
 progress_report = {
     "totalPages": total_pages,
+    "totalPagesReal":0,
     "lastRunningPage": 0,
-    "pageError": "",
+    "pageError": [],
     "urlArray": [],
     "lastURLCounter": 0,
-    "urlError": ""
+    "urlError": []
 }
 
 if os.path.exists(progress_report_path):
@@ -96,6 +97,14 @@ except Exception as e:
     driver.quit()
     sys.exit(1)
 
+# change to be done
+total_pages=10
+zeroElemsCounter=0
+tempNum=progress_report["totalPages"]
+
+print(f"\nvalue of tempNum:{tempNum}\n")
+
+
 # Loop through event pages (Start from last successful page)
 for i in range(progress_report["lastRunningPage"] + 1, total_pages + 1):
 # for i in range(progress_report["lastRunningPage"] + 1, 9 + 1):
@@ -108,16 +117,28 @@ for i in range(progress_report["lastRunningPage"] + 1, total_pages + 1):
             elems = driver.find_elements(By.CLASS_NAME, "event-card-link ")
             print("Started scraping...")
             print(f"{len(elems)} items found on page {i}")
+            if len(elems)==0:
+                zeroElemsCounter=zeroElemsCounter+1
+                print(f"no events found on this page:{i}")
+                if zeroElemsCounter==5:
+                    progress_report["totalPagesReal"]=i-5
+                    print(f"since all other are empty therefore we are stopping here at page : {i+1}")
+                    
+                    progress_report["totalPages"]=i+1
+
         except Exception as e:
             print(f"Error finding event elements on page {i}: {e}")
-            progress_report["pageError"] = str(e)
+            progress_report["pageError"].append({
+                "page": i,
+                "error": str(e)
+            })
             break
 
         # Process each event element
         for elem in elems:
             try:
                 d = elem.get_attribute("outerHTML")
-                file_path = os.path.join(output_dir, f"{queryCity}_{file}.txt")
+                file_path = os.path.join(output_dir, f"{queryCity}_{file}_{i}.txt")
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(d)
                 file += 1
@@ -126,7 +147,7 @@ for i in range(progress_report["lastRunningPage"] + 1, total_pages + 1):
                 # progress_report["lastURLCounter"] = urlCounter
             except Exception as e:
                 print(f"Failed to write data to file {file_path}: {e}")
-                progress_report["urlError"] = str(e)
+                # progress_report["urlError"] = str(e)
                 break
 
         # Update the progress report after each page
@@ -138,8 +159,12 @@ for i in range(progress_report["lastRunningPage"] + 1, total_pages + 1):
 
     except Exception as e:
         print(f"Unexpected error while processing page {i}: {e}")
-        progress_report["pageError"] = str(e)
-        break
+        progress_report["pageError"].append({
+            "page": i,
+            "error": str(e)
+        })
+
+
 
 # Close the driver safely
 try:
@@ -148,13 +173,24 @@ except Exception as e:
     print(f"Error while closing the WebDriver: {e}")
 
 
+progress_report["totalPages"]=tempNum
+with open(progress_report_path, "w") as f:
+    json.dump(progress_report, f, indent=4)
+
+
 print(f"Now starting extracting links from data/{queryCountry}/{queryCity}/..\n\n\n")
 
 
 
 try:
     RawUrls = extract_hrefs_from_folder(queryCountry, queryCity)
+    # change to be done
+    print("\n\nthis is Raw urls\n\n")
+    print(RawUrls)
+    # change to be done
     urls=get_unique_urls(RawUrls)
+    print("\n\nthis is unique urls\n\n")
+    print(urls)
 except Exception as e:
     print(f"Error extracting Links or hrefs from  data/{queryCountry}/{queryCity}/.. \n\n\n:", e)
 

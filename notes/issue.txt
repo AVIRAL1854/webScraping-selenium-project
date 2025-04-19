@@ -47,3 +47,15 @@ LEFT---->
 
 
 Error processing https://www.eventbrite.com/e/an-evening-with-thriller-authors-elena-taylor-and-jeff-ayers-tickets-1321991224339?aff=ebdssbdestsearch: HTTPConnectionPool(host='localhost', port=53862): Read timed out. (read timeout=120)
+
+
+
+
+--------
+
+original final pages
+each url have page number and save it 
+save page error in array along with page number
+save url error with url error in each page
+get follower number 
+get number of events
