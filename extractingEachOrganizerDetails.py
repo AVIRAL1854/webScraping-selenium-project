@@ -243,30 +243,30 @@ def extract_social_links_from_urls(urls, queryCountry='default', queryCity='defa
 
 
 
-# testUrl =[
-#     "https://www.eventbrite.com/e/seattle-new-friends-single-professionals-mixer-33-42-group-tickets-1305657720389?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/in-person-class-hand-rolled-sushi-seattle-tickets-1287920447729?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/bearracuda-seattles-locker-room-party-tickets-1317654312519?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/the-well-day-retreat-for-mothers-and-gestational-parents-tickets-1284798580139?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/sake-x-jazz-presents-trio-samambaia-when-spring-comes-at-kais-bistro-tickets-1309095964269?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/mediumship-demonstration-tickets-1287926415579?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/introduction-to-sensual-dance-and-low-flow-tickets-1079459706039?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/press-sip-a-luxury-press-on-nail-experience-tickets-1305085729549?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/km-huber-with-suzanne-morrison-call-of-the-owl-woman-tickets-1312123068419?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/4-day-pmp-examination-certification-training-course-in-bellevue-wa-tickets-975711448207?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/lucky-seven-casino-night-at-the-collective-seattle-tickets-1307392539279?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/agile-certification-from-pmi-in-seattle-tickets-1219123915449?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/the-rose-codes-unlock-your-intuition-creativity-higher-wisdom-tickets-1316663549119?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/jazzvox-house-concert-john-proulx-alyssa-allgood-seattle-madrona-2-tickets-1210223584319?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/suite-restaurant-lounge-bellevue-paint-your-pet-tickets-1258923557249?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/2025-world-tai-chi-and-quigong-day-free-tai-chi-seminar-tickets-1285182658929?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/in-person-cisa-exam-prep-course-in-seattle-tickets-1112313783469?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/elev8-tickets-1295202659019?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/seattle-shores-love-scavenger-hunt-for-couples-date-night-tickets-821477650767?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/healthcare-and-business-networking-elevating-your-potential-seattle-tickets-1268610902359?aff=ebdssbdestsearch",
-#     "https://www.eventbrite.com/e/sips-silent-reading-tickets-1307342750359?aff=ebdssbdestsearch"
+testUrl =[
+    "https://www.eventbrite.com/e/seattle-new-friends-single-professionals-mixer-33-42-group-tickets-1305657720389?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/in-person-class-hand-rolled-sushi-seattle-tickets-1287920447729?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/bearracuda-seattles-locker-room-party-tickets-1317654312519?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/the-well-day-retreat-for-mothers-and-gestational-parents-tickets-1284798580139?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/sake-x-jazz-presents-trio-samambaia-when-spring-comes-at-kais-bistro-tickets-1309095964269?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/mediumship-demonstration-tickets-1287926415579?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/introduction-to-sensual-dance-and-low-flow-tickets-1079459706039?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/press-sip-a-luxury-press-on-nail-experience-tickets-1305085729549?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/km-huber-with-suzanne-morrison-call-of-the-owl-woman-tickets-1312123068419?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/4-day-pmp-examination-certification-training-course-in-bellevue-wa-tickets-975711448207?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/lucky-seven-casino-night-at-the-collective-seattle-tickets-1307392539279?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/agile-certification-from-pmi-in-seattle-tickets-1219123915449?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/the-rose-codes-unlock-your-intuition-creativity-higher-wisdom-tickets-1316663549119?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/jazzvox-house-concert-john-proulx-alyssa-allgood-seattle-madrona-2-tickets-1210223584319?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/suite-restaurant-lounge-bellevue-paint-your-pet-tickets-1258923557249?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/2025-world-tai-chi-and-quigong-day-free-tai-chi-seminar-tickets-1285182658929?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/in-person-cisa-exam-prep-course-in-seattle-tickets-1112313783469?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/elev8-tickets-1295202659019?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/seattle-shores-love-scavenger-hunt-for-couples-date-night-tickets-821477650767?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/healthcare-and-business-networking-elevating-your-potential-seattle-tickets-1268610902359?aff=ebdssbdestsearch",
+    "https://www.eventbrite.com/e/sips-silent-reading-tickets-1307342750359?aff=ebdssbdestsearch"
     
-#     ]
+    ]
 
 
-# extract_social_links_from_urls(testUrl,"India2","bhopalsdsdsdsd11")
+extract_social_links_from_urls(testUrl,"Indiasdsd2","bhopalsdsdsdsd11")

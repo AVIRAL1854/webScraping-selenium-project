@@ -32,12 +32,12 @@ def extract_hrefs_from_folder(country_name: str, city_name: str):
 # Example usage
 
 
-if __name__ == "__main__":
-    country = "wa"
-    city = "seattle"
-    urls = extract_hrefs_from_folder(country, city)
+# if __name__ == "__main__":
+#     country = "wa"
+#     city = "seattle"
+#     urls = extract_hrefs_from_folder(country, city)
     
-    print("this is the length of arrays:")
-    print(+len(urls))
-    for url in urls:
-        print(url)
+#     print("this is the length of arrays:")
+#     print(+len(urls))
+#     for url in urls:
+#         print(url)
